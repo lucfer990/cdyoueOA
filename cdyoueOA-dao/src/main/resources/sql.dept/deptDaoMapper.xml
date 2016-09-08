@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.youedata.cd.cdyoueOA.dao.dept.DeptDao">
+	<select id="selectAllDept" resultType="com.youedata.cd.cdyoueOA.pojo.Dept">
+	  select dept_id as deptId,dept_name as deptName,tel_no as telNo
+	  ,fax_no as faxNo,dept_address as deptAddress,dept_no as deptNo
+	  ,dept_parent as deptParent,manager,assistant_id as assistantId,
+	  leader1,leader2,dept_func as  deptFunc,is_org as isOrg,
+	  org_admin as orgAdmin,dept_email_audits_ids as deptEmailAuditsIds
+	  from td_oa.department		
+	</select>
+	<select id="selectAllUserByDeptid" resultType="com.youedata.cd.cdyoueOA.pojo.YoueUserDto" parameterType="java.util.Map">
+	  select  uid as uId,user_id as userId,user_name as userName, dept_name as deptName from td_oa.department d, td_oa.user u  where d.dept_id=u.dept_id
+	  and  d.dept_id in
+	  <foreach item="item" index="index" collection="deptId" open="(" separator="," close=")">  
+		 #{item}  
+	</foreach>  
+	</select>
+	
+</mapper>

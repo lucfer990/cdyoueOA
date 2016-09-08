@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/cdyoueOA.iml" filepath="$PROJECT_DIR$/cdyoueOA.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cdyoueOA-common/cdyoueOA-common.iml" filepath="$PROJECT_DIR$/cdyoueOA-common/cdyoueOA-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cdyoueOA-dao/cdyoueOA-dao.iml" filepath="$PROJECT_DIR$/cdyoueOA-dao/cdyoueOA-dao.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cdyoueOA-pojo/cdyoueOA-pojo.iml" filepath="$PROJECT_DIR$/cdyoueOA-pojo/cdyoueOA-pojo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cdyoueOA-service/cdyoueOA-service.iml" filepath="$PROJECT_DIR$/cdyoueOA-service/cdyoueOA-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cdyoueOA-web/cdyoueOA-web.iml" filepath="$PROJECT_DIR$/cdyoueOA-web/cdyoueOA-web.iml" />
+    </modules>
+  </component>
+</project>

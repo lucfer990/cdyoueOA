@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.youedata.cd.cdyoueOA.dao.log.LogDao">
+
+	<!--根据ID查询-->
+	<select id="get" parameterType="Long" resultType="com.youedata.cd.cdyoueOA.pojo.Log">
+		select id,fill_id fillId,title,focus_users focusUsers,content,start_time startTime,end_time endTime
+		from ue_log where id=#{id}
+	</select>
+	
+	<!--查询个人所有日志-->
+	<select id="getAll" parameterType="com.youedata.cd.cdyoueOA.pojo.Log" resultType="com.youedata.cd.cdyoueOA.pojo.Log">
+		select id,fill_id fillId,title,focus_users focusUsers,content,start_time startTime,end_time endTime from ue_log where fill_id=#{fillId}
+	</select>
+	
+	<!--查询所有关注我的日志-->
+<!-- 	<select id="getLogFocus" parameterType="com.youedata.cd.cdyoueOA.pojo.Log" resultType="com.youedata.cd.cdyoueOA.pojo.Log"> -->
+<!-- 		select id,fill_id fillId,title,focus_users focusUsers,content,start_time startTime,end_time endTime from ue_log  -->
+<!-- 		<include refid="where_paging" />  -->
+<!-- 	</select> -->
+	
+
+	<!--分页查询-->
+	<select id="findByItem" resultType="com.youedata.cd.cdyoueOA.pojo.Log" parameterType="java.util.Map">
+		select id,fill_id fillId,title,focus_users focusUsers,content,start_time startTime,end_time endTime 
+		from ue_log 
+		<include refid="where_paging" />
+		
+		ORDER BY start_time DESC
+		limit ${star},${rows}
+	</select>
+
+	<!--数据总数-->
+	<select id="findByItemCount" resultType="Long" parameterType="java.util.Map">
+		SELECT count(id) from ue_log
+		<include refid="where_paging" />
+	</select>
+	
+	
+	<!-- where分页查询条件 -->
+	<sql id="where_paging">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="true">
+				<!-- 逗号分割查询语句 -->
+				and find_in_set(#{focusUsers},focus_users) 
+			</if>
+			<if test="title != null and title != ''">
+ 				and title = #{title}
+ 			</if>
+			<if test="startTimeString != null and startTimeString != ''">
+ 				and start_time >= #{startTimeString}
+ 			</if>
+ 		</trim>
+	</sql>
+
+
+	<!-- 通过时间条件查询 -->
+<!-- 	<select id="getDateQuery" parameterType="com.youedata.cd.cdyoueOA.pojo.Log" resultType="com.youedata.cd.cdyoueOA.pojo.Log"> -->
+<!-- 		select * from ue_log -->
+<!-- 		<include refid="where_logDate" /> -->
+<!-- 	</select> -->
+	
+	<!-- where查询日志条件 -->
+<!-- 	<sql id="where_logDate"> -->
+<!-- 		<trim prefix="where" prefixOverrides="and|or"> -->
+<!-- 			<if test="startTime != null and startTime != ''"> -->
+<!-- 				and ue_log(start_time,'%Y-%m')=ue_log(#{startTime},'%Y-%m') -->
+<!-- 			</if> -->
+<!-- 			<if test="endTime != null and endTime != ''"> -->
+<!-- 				and ue_log(end_time,'%Y-%m')=ue_log(#{endTime},'%Y-%m') -->
+<!-- 			</if> -->
+<!-- 		</trim> -->
+<!-- 	</sql> -->
+
+	<!--新增-->
+	<insert id="add" parameterType="com.youedata.cd.cdyoueOA.pojo.Log" keyProperty="id" useGeneratedKeys="true">
+          insert into ue_log(fill_id,title,focus_users,content,start_time,end_time)
+		  values(#{fillId},#{title},#{focusUsers},#{content},#{startTime},#{endTime});
+	</insert>
+
+	<!--删除日志-->
+	<delete id="delLog" parameterType="Long">
+			delete from ue_log where id=#{id};
+	</delete>
+
+	<!--修改-->
+	<update id="update" parameterType="com.youedata.cd.cdyoueOA.pojo.Log">
+		update ue_log set
+		title=#{title},focus_users=#{focusUsers},content=#{content},start_time=#{startTime},end_time=#{endTime}
+		where id=#{id}
+	</update>
+</mapper>

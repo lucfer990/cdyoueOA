@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.youedata.cd.cdyoueOA.dao.task.TaskDao">
+
+	<!--根据ID查询任务-->
+	<select id="getTask" parameterType="Long" resultType="com.youedata.cd.cdyoueOA.pojo.Task">
+		select id,plan_id planId,title,executor_id executorId,assigner_id assignerId,focus_users focusUsers,content,attachments,emergency,
+		pub_time pubTime,start_time startTime,end_time endTime,candidate_id candidateId,candi_time candiTime,candi_comment candiComment,
+		status,alert
+		from ue_task
+		where id=#{taskId}
+	</select>
+
+	<!--设置报告进度为100%的任务的status=4(完成)-->
+	<update id="updateTaskFinish">
+		update ue_task ut set ut.status=4 where ut.id=(select ur.task_id from ue_report ur where ur.percent=100)
+
+	</update>
+	
+	<!--根据计划ID查询任务-->
+	<select id="getTaskByPlan" parameterType="Long" resultType="com.youedata.cd.cdyoueOA.pojo.Task">
+		select id,plan_id planId,title,executor_id executorId,assigner_id assignerId,focus_users focusUsers,content,attachments,emergency,
+		pub_time pubTime,start_time startTime,end_time endTime,candidate_id candidateId,candi_time candiTime,candi_comment candiComment,
+		status,alert
+		from ue_task
+		where plan_id=#{planId} and
+		status=1 <![CDATA[and start_time<=NOW()]]> <![CDATA[and end_time >=NOW()]]>
+
+	</select>
+
+
+	<!--新增任务-->
+	<insert id="addTask" parameterType="com.youedata.cd.cdyoueOA.pojo.Task" keyProperty="id">
+          insert into ue_task(plan_id,title,focus_users,executor_id,assigner_id,content,attachments,emergency,
+		  pub_time,start_time,end_time,status,alert)
+		  values(#{planId},#{title},#{focusUsers},#{executorId},#{assignerId},#{content},#{attachments},#{emergency},#{pubTime},
+		  #{startTime},#{endTime},#{status},#{alert});
+
+	</insert>
+	<!--新增任务-->
+	<insert id="addTaskInfo" parameterType="com.youedata.cd.cdyoueOA.pojo.TaskInfo" keyProperty="id">
+          insert into ue_task(plan_id,title,focus_users,executor_id,assigner_id,content,attachments,emergency,
+		  pub_time,start_time,end_time,status,alert,candi_time,complete_time,candi_comment)
+		  values(#{planId},#{title},#{focusUsers},#{executorId},#{assignerId},#{content},#{attachments},#{emergency},#{pubTime},
+		  #{startTime},#{endTime},#{status},#{alert},#{candiTime},#{completeTime},#{candiComment});
+
+	</insert>
+
+<!--	<insert id="addTask" parameterType="com.youedata.cd.cdyoueOA.pojo.Task" keyProperty="id">
+		insert into ue_task(plan_id,title,executor_id,assigner_id,content,attachments,emergency,
+		pub_time,start_time,status,alert)
+		values(#{planId},#{title},#{executorId},#{assignerId},#{content},#{attachments},#{emergency},#{pubTime},
+		#{startTime},#{status},#{alert});
+	</insert>-->
+
+	<!--删除任务-->
+	<delete id="delTask" parameterType="Long">
+			delete from ue_task where id=#{taskId};
+	</delete>
+
+	<!--修改任务-->
+	<update id="updateTask" parameterType="com.youedata.cd.cdyoueOA.pojo.Task">
+		update ue_task set
+		<if test="planId != null and planId != '' ">
+			plan_id=#{planId},
+		</if>
+		title=#{title},executor_id=#{executorId},assigner_id=#{assignerId},focus_users=#{focusUsers},content=#{content},attachments=#{attachments},
+		emergency=#{emergency},pub_time=#{pubTime},start_time=#{startTime},end_time=#{endTime},candidate_id=#{candidateId},candi_time=#{candiTime},
+		candi_comment=#{candiComment},status=#{status},alert=#{alert},complete_time=#{completeTime}
+		where id=#{id}
+	</update>
+	<!--修改任务-->
+	<update id="updateTaskInfo" parameterType="com.youedata.cd.cdyoueOA.pojo.TaskInfo">
+		update ue_task set
+		<if test="planId != null and planId != '' ">
+			plan_id=#{planId},
+		</if>
+		title=#{title},executor_id=#{executorId},assigner_id=#{assignerId},focus_users=#{focusUsers},content=#{content},attachments=#{attachments},
+		emergency=#{emergency},pub_time=#{pubTime},start_time=#{startTime},end_time=#{endTime},candidate_id=#{candidateId},candi_time=#{candiTime},
+		candi_comment=#{candiComment},status=#{status},alert=#{alert},complete_time=#{completeTime}
+		where id=#{id}
+	</update>
+
+	<!--分页查询-->
+	<select id="findByItem" resultType="com.youedata.cd.cdyoueOA.pojo.Task">
+		SELECT id,plan_id planId,title,executor_id executorId,assigner_id assignerId,focus_users focusUsers,content,attachments,emergency,
+		pub_time pubTime,start_time startTime,end_time endTime,candidate_id candidateId,candi_time candiTime,candi_comment candiComment,
+		status,alert from ue_task WHERE 1=1
+		<if test="title != null and title != ''">
+			and title like "%${title}%"
+		</if>
+		<if test="status !=null and status !=''">
+			and status=#{status}
+		</if>
+		<if test="fromdate != null and fromdate != ''">
+			AND start_time >= #{fromdate}
+		</if>
+		<if test="todate != null and todate != ''">
+			<![CDATA[
+			and end_time <=#{todate}
+		    ]]>
+		</if>
+		/*ORDER BY pub_time DESC*/
+		limit ${star},${rows}
+	</select>
+
+	<!--数据总数-->
+	<select id="findByItemCount" resultType="Long">
+		SELECT count(id) from ue_task where 1=1
+		<if test="title != null and title != ''">
+			and title like "%${title}%"
+		</if>
+		<if test="status !=null and status !=''">
+			and status=#{status}
+		</if>
+		<if test="fromdate != null and fromdate != ''">
+			AND start_time >= #{fromdate}
+		</if>
+		<if test="todate != null and todate != ''">
+			<![CDATA[
+			and end_time <=#{todate}
+		    ]]>
+		</if>
+	</select>
+	<!--个人任务和执行人关注任务分页查询-->
+	<select id="findTaskDtoByItem" resultType="com.youedata.cd.cdyoueOA.pojo.TaskInfo">
+		SELECT id,plan_id as  planId,(select user_name from user where uid =ut.assigner_id) as assignerName,(select user_name from user where uid =ut.executor_id) as executorName, title,(select title from ue_plan where id =ut.plan_id) as planName,executor_id executorId,assigner_id assignerId,focus_users focusUsers,content,attachments,emergency,
+		pub_time as pubTime,start_time as  startTime,end_time as endTime,candidate_id candidateId,candi_time as candiTime,candi_comment as candiComment,complete_time as completeTime,
+		status,alert from ue_task ut WHERE 1=1 				
+		<if test="executorId != null and executorId != ''">
+			and executor_id=#{executorId}
+		</if>		
+		<if test="assignerId != null and assignerId != ''">
+			<![CDATA[
+			and ut.assigner_id=#{assignerId}
+			]]>
+		</if>
+		<if test="focusId != null and focusId != ''">
+			<![CDATA[
+			and find_in_set(#{focusId},focus_users)
+		    ]]>
+		</if>
+		<if test="title != null and title != ''">
+			and title like "%${title}%"
+		</if>
+		<if test="alert != null and alert != ''">
+			and alert=#{alert}
+		</if>
+		<if test="status !=null and status !=''">
+			and status=#{status}
+		</if>
+		<if test="fromdate != null and fromdate != ''">
+			AND start_time >= #{fromdate}
+		</if>
+		<if test="todate != null and todate != ''">
+			<![CDATA[
+			and end_time <=#{todate}
+		    ]]>
+		</if>
+		ORDER BY pub_time DESC
+		limit ${star},${rows}
+	</select>
+	<!--个人任务数据总数-->
+	<select id="findTaskDtoByItemCount" resultType="Long">
+		SELECT count(id) from ue_task where 1=1		
+		<if test="executorId != null and executorId != ''">
+			and executor_id=#{executorId}
+		</if>
+		<if test="assignerId != null and assignerId != ''">
+			
+			and assigner_id=#{assignerId}
+		
+		</if>
+		<if test="focusId != null and focusId != ''">
+			<![CDATA[
+			and find_in_set(#{focusId},focus_users)
+		    ]]>
+		</if>
+		<if test="alert != null and alert != ''">
+			and alert=#{alert}
+		</if>
+		<if test="title != null and title != ''">
+			and title like "%${title}%"
+		</if>
+		<if test="status !=null and status !=''">
+			and status=#{status}
+		</if>
+		<if test="fromdate != null and fromdate != ''">
+			AND start_time >= #{fromdate}
+		</if>
+		<if test="todate != null and todate != ''">
+			<![CDATA[
+			and end_time <=#{todate}
+		    ]]>
+		</if>
+	</select>
+	
+	<!--所有可关注任务分页查询-->
+	<select id="findAllTaskDtoByItem" resultType="com.youedata.cd.cdyoueOA.pojo.TaskInfo">
+		SELECT id,plan_id planId, title,executor_id executorId,assigner_id assignerId,focus_users focusUsers,content,attachments,emergency,
+		pub_time pubTime,start_time startTime,end_time endTime,candidate_id candidateId,candi_time candiTime,candi_comment candiComment,
+		status,alert from ue_task ut,department d WHERE 1=1
+		<if test="title != null and title != ''">
+			and title like "%${title}%"
+		</if>
+		<if test="status !=null and status !=''">
+			and status=#{status}
+		</if>
+		<if test="fromdate != null and fromdate != ''">
+			AND start_time >= #{fromdate}
+		</if>
+		<if test="todate != null and todate != ''">
+			<![CDATA[
+			and end_time <=#{todate}
+		    ]]>
+		</if>
+		/*ORDER BY pub_time DESC*/
+		limit ${star},${rows}
+	</select>
+	<!--可关注任务数据总数-->
+	<select id="findAllTaskDtoByItemCount" resultType="Long">
+		SELECT count(id) from ue_task where 1=1
+		<if test="title != null and title != ''">
+			and title like "%${title}%"
+		</if>
+		<if test="status !=null and status !=''">
+			and status=#{status}
+		</if>
+		<if test="fromdate != null and fromdate != ''">
+			AND start_time >= #{fromdate}
+		</if>
+		<if test="todate != null and todate != ''">
+			<![CDATA[
+			and end_time <=#{todate}
+		    ]]>
+		</if>
+	</select>
+	<!--查询所有任务 -->
+	<select id="getAllTask" parameterType="int" resultType="com.youedata.cd.cdyoueOA.pojo.Task">
+		select id,title
+		from ue_task where executor_id=#{uid} and status=1
+	</select>
+	<!--查询所有任务 汇报对象-->
+	<select id="getTaskPerson" resultType="com.youedata.cd.cdyoueOA.pojo.Task">
+		select u.user_name assigner,u.uid assignerId
+		from ue_task ut left JOIN user u on ut.assigner_id=u.uid  where ut.executor_id=#{uid} and ut.status=1 and ut.id=#{taskid}
+	</select>
+	<!--关注某任务-->
+	<update id="updatetaskForFocus">
+		update ue_task ut set ut.focus_users=#{uid} where ut.id=#{taskId}
+	</update>
+	<!--查看是否已经关注某任务-->
+	<select id="findIsFocus" resultType="int">
+       select count(id) from ue_task where id=#{taskId} and FIND_IN_SET(#{uid},focus_users)
+	</select>
+	<!--查看此任务里关注人是否为空-->
+	<select id="findIsOtherFocus" resultType="int" parameterType="int">
+		select count(id) from ue_task where id=#{taskId} and ISNULL(focus_users)
+	</select>
+	<!--如果已经有其他关注人  查出关注人-->
+	<select id="findotherfocus" resultType="String" parameterType="int">
+		SELECT focus_users from ue_task where id=#{taskId}
+	</select>
+
+</mapper>

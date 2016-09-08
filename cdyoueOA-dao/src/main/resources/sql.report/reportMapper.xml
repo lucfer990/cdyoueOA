@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.youedata.cd.cdyoueOA.dao.report.ReportDao">
+
+	<!--根据ID查询报告-->
+	<select id="getReport" parameterType="Long" resultType="com.youedata.cd.cdyoueOA.pojo.Report">
+		SELECT ur.id,ut.title taskId,ut.focus_users userId,ur.percent percent,ur.report report,ur.report_time reportTime,u.USER_NAME reportObject
+		from ue_report ur left join ue_task ut
+		on ur.task_id=ut.id left join user u on u.uid=ur.report_object where ur.id=#{reportId}
+	</select>
+
+	<!--查询没有加入报告评阅表中的报告的id-->
+	<select id="getReportNotinComment" resultType="int">
+		select ur.id id from ue_report ur left JOIN ue_reportcomment uc on ur.id=uc.report_id where uc.report_id is null
+	</select>
+
+	<!--新增报告-->
+	<insert id="addReport" parameterType="com.youedata.cd.cdyoueOA.pojo.Report">
+          insert into ue_report(task_id,percent,report,report_time,report_object)
+		  values(#{taskId},#{percent},#{report},NOW(),#{reportObject});
+	</insert>
+
+	<!--删除报告-->
+	<delete id="delReport" parameterType="Long">
+			delete from ue_report where id=#{reportId};
+	</delete>
+
+	<!--修改报告-->
+	<update id="updateReport" parameterType="com.youedata.cd.cdyoueOA.pojo.Report">
+		update ue_report set
+		<if test="taskId != null and taskId != '' ">
+			task_id=#{taskId},
+		</if>
+		percent=#{percent},report=#{report},report_time=#{reportTime}
+
+		where id=#{id}
+	</update>
+
+	<!--分页查询-->
+	<select id="findByItem" resultType="com.youedata.cd.cdyoueOA.pojo.Report">
+		SELECT ut.title taskId,u.user_name reportUser,ut.assigner_id reportObject,
+		ur.id,ur.percent,ur.report,ur.report_time reportTime
+		from ue_report  ur left join ue_task ut
+		on ur.task_id=ut.id left join user u on u.uid=#{uid} where ut.executor_id=#{uid}
+		<if test="taskId !=null and taskId !=''">
+            and ur.task_id=#{taskId}
+		</if>
+		<if test="fromdate != null and fromdate != ''">
+			AND ur.report_time >= #{fromdate}
+		</if>
+		<if test="todate != null and todate != ''">
+			<![CDATA[
+			and ur.report_time <=#{todate}
+		    ]]>
+		</if>
+		ORDER BY ur.report_time DESC
+		<![CDATA[
+		limit ${star},${rows}
+		 ]]>
+	</select>
+
+	<!--数据总数-->
+	<select id="findByItemCount" resultType="Long">
+		SELECT count(ur.id)
+		from ue_report  ur left join ue_task ut
+		on ur.task_id=ut.id left join user u on u.uid=#{uid} where ut.executor_id=#{uid}
+		<if test="taskId !=null and taskId !=''">
+			and ut.task_id=#{taskId}
+		</if>
+		<if test="fromdate != null and fromdate != ''">
+			AND ur.report_time >= #{fromdate}
+		</if>
+		<if test="todate != null and todate != ''">
+			<![CDATA[
+			and ur.report_time <=#{todate}
+		    ]]>
+		</if>
+	</select>
+
+
+
+</mapper>

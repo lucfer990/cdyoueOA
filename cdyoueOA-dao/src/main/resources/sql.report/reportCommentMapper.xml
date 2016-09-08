@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.youedata.cd.cdyoueOA.dao.report.ReportCommentDao">
+	<!--新增报告评阅  写报告时-->
+	<insert id="addReportComment" parameterType="com.youedata.cd.cdyoueOA.pojo.ReportComment">
+		insert into ue_reportcomment(report_id,comment_status,report_user) values(#{reportId},#{reportUser});
+	</insert>
+	<!--更新报告评阅  评阅报告时-->
+	<update id="updateReportComment" parameterType="com.youedata.cd.cdyoueOA.pojo.ReportComment">
+          update ue_reportcomment set report_score=#{reportScore},report_comment=#{reportComment},
+          comment_status=1,report_id=#{reportId} where id=#{id}
+	</update>
+
+	<!--分页查询-->
+	<select id="findByItem" resultType="com.youedata.cd.cdyoueOA.pojo.ReportComment">
+		select uc.id id,ur.id reportId,uc.comment_status commentStatus,ur.report reportContent,ur.report_time reportTime,
+		u.USER_NAME reportUser,uc.report_score reportScore,uc.report_comment reportComment,
+		ut.focus_users focusUsers,ut.id taskCommentId
+		from ue_reportcomment uc
+		LEFT JOIN ue_report ur on uc.report_id=ur.id
+		LEFT JOIN user u on u.UID=uc.report_user LEFT JOIN ue_task ut on ut.id=ur.task_id where ut.id is not null
+		<if test="reportUser !=null and reportUser !=''">
+            and FIND_IN_SET(#{reportUser},u.UID)
+		</if>
+		<if test="commentStatus !='' and commentStatus !=null and commentStatus !=3 ">
+			and uc.comment_status=#{commentStatus}
+		</if>
+
+		<if test="commentStatus == 3">
+			and FIND_IN_SET(#{uid},ut.focus_users)
+		</if>
+
+		<if test="fromdate != null and fromdate != ''">
+			AND ur.report_time >= #{fromdate}
+		</if>
+		<if test="todate != null and todate != ''">
+			<![CDATA[
+			and ur.report_time <=#{todate}
+		    ]]>
+		</if>
+		ORDER BY ur.report_time DESC
+		<![CDATA[
+		limit ${star},${rows}
+		 ]]>
+	</select>
+
+	<!--数据总数-->
+	<select id="findByItemCount" resultType="Long">
+		select count(uc.id)
+		from ue_reportcomment uc
+		LEFT JOIN ue_report ur on uc.report_id=ur.id
+		LEFT JOIN user u on u.UID=uc.report_user LEFT JOIN ue_task ut on ut.id=ur.task_id where ut.id is not null
+		<if test="reportUser !=null and reportUser !=''">
+			and FIND_IN_SET(#{reportUser},u.UID)
+		</if>
+		<if test="commentStatus !='' and commentStatus !=null and commentStatus !=3 ">
+			and uc.comment_status=#{commentStatus}
+		</if>
+		<if test="commentStatus == 3">
+			and FIND_IN_SET(#{uid},ut.focus_users)
+		</if>
+
+		<if test="fromdate != null and fromdate != ''">
+			AND ur.report_time >= #{fromdate}
+		</if>
+		<if test="todate != null and todate != ''">
+			<![CDATA[
+			and ur.report_time <=#{todate}
+		    ]]>
+		</if>
+	</select>
+</mapper>

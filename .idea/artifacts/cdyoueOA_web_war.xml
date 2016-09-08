@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="cdyoueOA-web:war">
+    <output-path>$PROJECT_DIR$/cdyoueOA-web/target</output-path>
+    <root id="archive" name="cdyoueOA-web.war">
+      <element id="artifact" artifact-name="cdyoueOA-web:war exploded" />
+    </root>
+  </artifact>
+</component>

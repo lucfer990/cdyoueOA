@@ -1,0 +1,27 @@
+body {
+	background-color: #326696;
+	margin: 0px;
+	overflow: hidden;
+	font-family:Monospace;
+	font-size:13px;
+	text-align:center;
+	font-weight: bold;
+	text-align:center;
+	position:relative;
+}
+a {
+	color:#0078ff;
+}
+.login-title{
+	    position: absolute;
+    padding: 0;
+    z-index: 2000;
+    left: 0;
+    right: 0;
+}
+.login-box{
+	padding:1px!important;
+}
+.login-box .red,.login-box .header{
+	text-align:left;
+}

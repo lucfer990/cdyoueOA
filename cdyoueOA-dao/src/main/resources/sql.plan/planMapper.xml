@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.youedata.cd.cdyoueOA.dao.plan.PlanDao">
+
+	<!--根据ID查询计划-->
+	<select id="getPlan" parameterType="Long" resultType="com.youedata.cd.cdyoueOA.pojo.Plan">
+		select id,title,is_template isTemplate,belong_to belongTo,proj_name projName,depts,content,attachments,type,supervisors,
+		create_by createBy,tasks,focus_users focusUsers,status,pub_time pubTime,start_time startTime,end_time endTime,loop_ loops
+		from ue_plan
+		where id=#{planId}
+	</select>
+
+	<!--新增计划-->
+	<insert id="addPlan" parameterType="com.youedata.cd.cdyoueOA.pojo.Plan">
+          insert into ue_plan(proj_name,title,is_template,belong_to,create_By,content,type,
+          focus_users,start_time,end_time,depts)
+		  values(#{projName},#{title},#{isTemplate},#{belongTo},#{createBy},#{content},#{type},
+		 #{focusUsers},#{startTime},#{endTime},#{depts});
+	</insert>
+
+	<!--完成计划-->
+	<update id="finishPlan" parameterType="com.youedata.cd.cdyoueOA.pojo.Plan">
+			update ue_plan  set status='3',finish_time=NOW() where id=#{id};
+	</update>
+	<!--废除计划-->
+	<update id="delPlan" parameterType="com.youedata.cd.cdyoueOA.pojo.Plan">
+			update ue_plan  set status='4' where id=#{id};
+	</update>
+	<!--当计划为废除时将ue_task表相关联的数据废除状态为‘0’-->
+	<update id="updateTaskSatus" parameterType="com.youedata.cd.cdyoueOA.pojo.Task">
+			update ue_task  set status='0' where plan_id=#{id+""};
+	</update>
+
+	<!--修改计划-->
+	<update id="updatePlan" parameterType="com.youedata.cd.cdyoueOA.pojo.Plan">
+		update ue_plan set title=#{title},is_template=#{isTemplate},belong_to=#{belongTo},proj_name=#{projName}
+		<!--<if test="titlepic_src != null and titlepic_src != '' ">
+			titlepic_src=#{titlepic_src},
+		</if>-->
+		where id=#{id}
+	</update>
+	<!--发布计划-->
+	<update id="releasePlanning" parameterType="com.youedata.cd.cdyoueOA.pojo.Plan">
+		update ue_plan set status="1", pub_time = now() 
+		where id=#{id}
+	</update>
+
+	<!--查询所有计划 用于定时扫描计划表-->
+	<select id="getAllPlanByScan" resultType="com.youedata.cd.cdyoueOA.pojo.Plan">
+         SELECT
+         id,title,loop_ loops
+		 from ue_plan
+		 where
+		 loop_ !=0
+		 and status=1
+		 <![CDATA[and start_time<=NOW()]]>
+		 <![CDATA[and end_time >=NOW()]]>
+
+	</select>
+
+	<!--分页查询-->
+	<select id="findByItem" resultType="com.youedata.cd.cdyoueOA.pojo.Plan" parameterType="java.util.Map">
+		SELECT
+		id,title,is_template isTemplate,belong_to belongTo,proj_name projName,depts,content,attachments,type,supervisors,
+		create_by createBy,tasks,focus_users focusUsers,status,pub_time pubTime,start_time startTime,end_time endTime,loop_ loops
+		from ue_plan WHERE 1=1
+		<if test="title != null and title != ''">
+			and title like "%${title}%"
+		</if>
+		<if test="projName !=null and projName !=''">
+			and proj_name like "%${projName}%"
+		</if>
+		<if test="createBy !=null and createBy !=''">
+			and create_by = #{createBy} 
+		</if>
+		<if test="status !=null and status !=''">
+			and status=#{status}
+		</if>
+		<if test="fromdate != null and fromdate != ''">
+			AND start_time >= #{fromdate}
+		</if>
+		<if test="todate != null and todate != ''">
+			<![CDATA[
+			and end_time <=#{todate}
+		    ]]>
+		</if>
+		ORDER BY id DESC
+		limit ${star},${rows}
+	</select>
+	
+	<!--按照登陆人session与条件来分页-->
+	<select id="findByItemAttention" resultType="com.youedata.cd.cdyoueOA.pojo.Plan" parameterType="java.util.Map">
+		SELECT
+		id,title,is_template isTemplate,belong_to belongTo,proj_name projName,depts,content,attachments,type,supervisors,
+		create_by createBy,tasks,focus_users focusUsers,status,pub_time pubTime,start_time startTime,end_time endTime,loop_ loops
+		from ue_plan WHERE 1=1
+		<if test="title != null and title != ''">
+			and title like "%${title}%"
+		</if>
+		<if test="projName !=null and projName !=''">
+			and proj_name like "%${projName}%"
+		</if>
+		<if test="createBy !=null and createBy !=''">
+			<!-- 逗号查询语句 -->
+			and find_in_set(#{createBy},focus_users)  
+		</if>
+		<if test="supervisors !=null and supervisors !=''">
+			and supervisors = #{supervisors} 
+		</if>
+		<if test="status !=null and status !=''">
+			and status=#{status}
+		</if>
+		<if test="fromdate != null and fromdate != ''">
+			AND start_time >= #{fromdate}
+		</if>
+		<if test="todate != null and todate != ''">
+			<![CDATA[
+			and end_time <=#{todate}
+		    ]]>
+		</if>
+		ORDER BY id DESC
+		limit ${star},${rows}
+	</select>
+	
+	<!--数据总数-->
+	<select id="findByItemCount" resultType="Long" parameterType="java.util.Map">
+		SELECT count(id) from ue_plan where 1=1
+		<if test="title != null and title != ''">
+			and title like "%${title}%"
+		</if>
+		<if test="projName !=null and projName !=''">
+			and proj_name like "%${projName}%"
+		</if>
+		<if test="status !=null and status !=''">
+			and status=#{status}
+		</if>
+		<if test="createBy !=null and createBy !=''">
+			and create_by = #{createBy} 
+		</if>
+		<if test="supervisors !=null and supervisors !=''">
+			and supervisors = #{supervisors} 
+		</if>
+		<if test="fromdate != null and fromdate != ''">
+			AND start_time >= #{fromdate}
+		</if>
+		<if test="todate != null and todate != ''">
+			<![CDATA[
+			and end_time <=#{todate}
+		    ]]>
+		</if>
+	</select>
+
+</mapper>

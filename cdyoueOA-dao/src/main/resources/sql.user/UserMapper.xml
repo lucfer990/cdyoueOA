@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.youedata.cd.cdyoueOA.dao.user.UserDao">
+  
+  <select id="findUserByUserTypeAndPswd" parameterType="java.util.Map" resultType="com.youedata.cd.cdyoueOA.pojo.User">
+		select																	  
+		UID as uid , USER_ID as userId, USER_NAME as userName, 
+	      USER_NAME_INDEX as userNameIndex, BYNAME as byName, USEING_KEY as useingKey, 
+	      USING_FINGER as usingFinger, PASSWORD as password, KEY_SN as keySn, 
+	      SECURE_KEY_SN as secureKeySn, USER_PRIV as userPriv, USER_PRIV_NO as userPrivNo, 
+	      USER_PRIV_NAME as userPrivName, POST_PRIV as postPriv, POST_DEPT as postDept, 
+	      DEPT_ID as deptId, DEPT_ID_OTHER as deptIdOther, SEX as sex, 
+	      BIRTHDAY as birthday, IS_LUNAR as isLunar, TEL_NO_DEPT as telNoDept, 
+	      FAX_NO_DEPT as faxNoDept, ADD_HOME as addHome, POST_NO_HOME as postNoHome, 
+	      TEL_NO_HOME as telNoHome, MOBIL_NO as mobilNO, BP_NO as bpNO, 
+	      EMAIL as email, OICQ_NO as qicqNo, ICQ_NO as icqNo, 
+	      MSN as msn, AVATAR as avatar, CALL_SOUND as callSound, 
+	      LAST_VISIT_TIME as lastVisitTime, SMS_ON as smsOn, MENU_TYPE as menuType, 
+	      LAST_PASS_TIME as lastPassTime, THEME as theme, SHORTCUT as shortcut, 
+	      PORTAL as portal, PANEL as panel, ONLINE as online, 
+	      ON_STATUS as onStatus, ATTEND_STATUS as attendStatus, MOBIL_NO_HIDDEN as mobilNoHidden, 
+	      MYTABLE_LEFT as mytableLeft, MYTABLE_RIGHT as mytableRight, USER_PRIV_OTHER as userPrivOther, 
+	      USER_NO as userNo, NOT_LOGIN as notLogin, NOT_VIEW_USER as notViewUser, 
+	      NOT_VIEW_TABLE as notViewTable, NOT_SEARCH as notSearch, BKGROUND as bkground, 
+	      BIND_IP as bindIp, LAST_VISIT_IP as lastVisitIp, MENU_IMAGE as menuImage, 
+	      WEATHER_CITY as weatherCity, SHOW_RSS as showRss, MENU_EXPAND as menuExpand, 
+	      MY_STATUS as myStatus, LIMIT_LOGIN as limitLogin, PHOTO as photo, 
+	      IM_RANGE as imRange, LEAVE_TIME as leaveTime, SECRET_LEVEL as secretLevel, 
+	      NOT_MOBILE_LOGIN as NotMobileLogin, MY_RSS as myRss, REMARK as remark, 
+	      USER_PARA as userPara
+		from td_oa.user 
+		where USER_ID = #{USER_ID}
+		<!-- <if test="pswd != null and pswd != '' ">  
+   			and PASSWORD = #{pswd}
+		</if> -->
+  </select>
+  
+   <update id="updatePasswordByFuid" parameterType="com.youedata.cd.cdyoueOA.pojo.User">
+		UPDATE
+			td_oa.user 
+		SET
+			PASSWORD = #{pswd} 
+		WHERE 
+			USER_ID = #{USER_ID}
+	</update>
+
+	<select id="findAllUser" resultType="com.youedata.cd.cdyoueOA.pojo.User">
+		SELECT UID uid,USER_ID userId,USER_NAME userName from td_oa.user
+	</select>
+
+	<!--根据用户ID字符串查找用户-->
+	<select id="findUserByUid" parameterType="String" resultType="com.youedata.cd.cdyoueOA.pojo.User">
+		select user_name userName from user u where FIND_IN_SET(uid,#{userId})
+	</select>
+</mapper>
